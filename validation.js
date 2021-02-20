@@ -23,6 +23,19 @@ const loginValidation = data => {
     return schema.validate(data)
 }
 
+const tradeValidation = data => {
+    const schema = Joi.object({
+        stock: Joi.string().max(10).required(),
+        contractType: Joi.string().required().valid('Call', 'Put'),
+        strike: Joi.number().required(),
+        expirationDate: Joi.date().required()
+    
+    })
+
+    return schema.validate(data)
+}
+
 
 module.exports.registerValidation = registerValidation;
 module.exports.loginValidation = loginValidation;
+module.exports.tradeValidation = tradeValidation;
