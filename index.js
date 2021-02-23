@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const app = express();
 const path = require('path');
 const verifyToken = require('./verifyToken');
+const cookieParser = require('cookie-parser')
 const cors = require('cors')
 
 dotenv.config();
@@ -13,6 +14,7 @@ app.set('view engine', 'handlebars');
 
 //Middleware
 app.use(cors())
+app.use(cookieParser())
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(express.json());
 
@@ -35,10 +37,6 @@ const tradesRoute = require('./routes/trades');
 app.use('/api/user/', authRoute);
 app.use('/api/trades/', tradesRoute);
 
-
-app.get('/getData', (req, res) => {
-    res.send('ASD IS THE VALUE OF THE RESPONSE, THIS IS A LONG VALUE VALUE VALUE')
-})
 
  
 app.get('/', function (req, res) {
