@@ -2,9 +2,11 @@ const router = require('express').Router();
 const Trade  = require('../models/Trade');
 const { tradeValidation } = require('../validation');
 const sequelize = require('../config/database');
+const { Op } = require('sequelize');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { startOfWeek, endOfWeek } = require('date-fns')
 
 const storage = multer.diskStorage({
     destination: '../images-storage/',
@@ -48,7 +50,7 @@ router.post('/', (req, res) => {
             await trade.save();
             res.send({trade: trade.id})
         } catch(err) {
-            res.status(400).send(err);
+            res.status(400).send({msg: err});
         }
     })
     
@@ -60,9 +62,36 @@ router.get('/all', async(req, res) => {
     res.send(results)
 })
 
-router.get('/current', async(req, res) => {
+router.get('/past', async(req, res) => {
+    const today = new Date();
+    const start = startOfWeek(today, {weekStartsOn: 1});
+    const end = endOfWeek(today, {weekStartsOn: 1});
+
     const results = await Trade.findAll({
+        where: {
+            createdAt: {
+                [Op.notBetween]: [start, end]
+            }
+        }
+    })
+    res.send(results)
+})
+
+router.get('/current', async(req, res) => {
+    const today = new Date();
+    const start = startOfWeek(today, {weekStartsOn: 1});
+    const end = endOfWeek(today, {weekStartsOn: 1});
+
+    /* const results = await Trade.findAll({
         where: sequelize.where(sequelize.literal('CURRENT_DATE'),sequelize.fn('date_trunc', 'day', sequelize.col('createdAt')))
+    }) */
+
+    const results = await Trade.findAll({
+        where: {
+            createdAt: {
+                [Op.between]: [start, end]
+            }
+        }
     })
     res.send(results)
 })

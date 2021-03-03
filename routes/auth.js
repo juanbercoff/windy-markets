@@ -11,12 +11,12 @@ router.post('/register', async (req, res) => {
     //Input validation
     const { error, value } = registerValidation(req.body);
 
-    if(error) return res.status(400).send(error.details[0].message)
+    if(error) return res.status(400).send({msg: error.details[0].message})
 
     //Existing user validation
     const emailExist = await User.findOne({ where: {email: req.body.email}});
 
-    if(emailExist) return res.status(400).send('That email is already registered');
+    if(emailExist) return res.status(400).send({msg: 'That email is already registered'});
 
     //Hashing the password
     const salt = await bcrypt.genSalt(10);
@@ -34,7 +34,7 @@ router.post('/register', async (req, res) => {
         const savedUser = await user.save();
         res.send({user: user.id})
     } catch(err) {
-        res.status(400).send(err);
+        res.status(400).send({msg: 'err'});
     }
 })
 
@@ -43,12 +43,12 @@ router.post('/login', async (req, res)=> {
     //Input validation
     const { error, value } = loginValidation(req.body);
 
-    if(error) return res.status(400).send(error.details[0].message)
+    if(error) return res.status(400).send({msg: error.details[0].message})
 
     //Existing user validation
     const user = await User.findOne({ where: {email: req.body.email}});
 
-    if(!user) return res.status(400).send('Email or password is wrong');
+    if(!user) return res.status(400).send({msg: 'Email or password is wrong'});
 
     //Password validation
     const validPass = await bcrypt.compare(req.body.password, user.password);
@@ -57,7 +57,7 @@ router.post('/login', async (req, res)=> {
 
     //Create and assign token
     const token = jwt.sign({id: user.id}, process.env.TOKEN_SECRET)
-    res.cookie('token', token, { httpOnly: true})
+    res.cookie('token', token, { httpOnly: true, sameSite: 'lax'})
 
     res.json({token})
 
