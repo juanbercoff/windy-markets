@@ -7,9 +7,10 @@ const { registerValidation, loginValidation } = require('../validation');
 //Register
 router.post('/register', async (req, res) => {
 	//Input validation
+	console.log('register');
 	const { error, value } = registerValidation(req.body);
 
-	if (error) return res.status(400).send(error.details[0].message);
+	if (error) return res.status(400).json('error ' + error.details[0].message);
 
 	//Existing user validation
 	const emailExist = await User.findOne({ where: { email: req.body.email } });
@@ -28,6 +29,7 @@ router.post('/register', async (req, res) => {
 		email: req.body.email,
 		password: hashedPassword,
 		role: 'user',
+		expo_push_token: req.body.expo_push_token,
 	});
 	try {
 		const savedUser = await user.save();
@@ -61,6 +63,7 @@ router.post('/login', async (req, res) => {
 	//Create and assign token
 	const token = jwt.sign({ id: user.id }, process.env.TOKEN_SECRET);
 	res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+	res.cookie('userId', user.id, { httpOnly: true, sameSite: 'lax' });
 	res.json({ token: token, role: user.role, userId: user.id });
 });
 

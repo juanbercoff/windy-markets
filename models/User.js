@@ -23,6 +23,10 @@ const User = db.define('user', {
 		type: DataTypes.STRING,
 		allowNull: false,
 	},
+	expo_push_token: {
+		type: DataTypes.STRING,
+		allowNull: true,
+	},
 });
 
 User.hasMany(UserTrade);

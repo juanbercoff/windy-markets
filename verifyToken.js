@@ -14,14 +14,6 @@ const verifyToken = (req, res, next) => {
 	}
 };
 
-const verifyIsSameUser = (req, res, next) => {
-	if (req.user.id === req.params.userId) {
-		next();
-	} else {
-		return res.status(401).send('Access Denied');
-	}
-};
-
 const verifyAdmin = async (req, res, next) => {
 	try {
 		const admin = await User.findOne({
@@ -39,4 +31,4 @@ const verifyAdmin = async (req, res, next) => {
 	}
 };
 
-module.exports = { verifyToken, verifyAdmin, verifyIsSameUser };
+module.exports = { verifyToken, verifyAdmin };

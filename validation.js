@@ -8,6 +8,7 @@ const registerValidation = (data) => {
 		lastName: Joi.string().min(2).required(),
 		email: Joi.string().min(3).required().email(),
 		password: Joi.string().min(6).required(),
+		expo_push_token: Joi.string().max(200),
 	});
 
 	return schema.validate(data);
@@ -38,6 +39,7 @@ const userTradeValidation = (data) => {
 	const schema = Joi.object({
 		price: Joi.number().required(),
 		amount: Joi.number().required(),
+		image: Joi.any(),
 	});
 
 	return schema.validate(data);

@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Trade = require('../models/Trade');
 const Image = require('../models/Image');
+const User = require('../models/User');
 const { tradeValidation } = require('../validation');
 const { Op } = require('sequelize');
 const multer = require('multer');
@@ -8,6 +9,7 @@ const { upload } = require('../config/storage');
 const fs = require('fs');
 const { startOfWeek, endOfWeek } = require('date-fns');
 const { verifyToken, verifyAdmin } = require('../verifyToken');
+const { sendNotifications } = require('../pushNotifications');
 
 const destination = '../windy-market-web/src/public/images/trade-images/';
 
@@ -45,6 +47,9 @@ router.post(
 			status: 'placed',
 		});
 		try {
+			const results = await User.findAll();
+			const push_tokens = results.map((e) => e.dataValues.expo_push_token);
+			console.log('tokens:   ' + push_tokens);
 			await trade.save();
 
 			const image = Image.build({
@@ -52,6 +57,7 @@ router.post(
 				tradeId: trade.id,
 			});
 			await image.save();
+			sendNotifications(push_tokens, 'NEW TRADE', 'TEST');
 			res.send({ trade: trade.id, image: image.id });
 		} catch (err) {
 			res.status(400).send({ msg: err });
@@ -181,12 +187,6 @@ router.put('/roll/:tradeId', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 router.delete('/', verifyToken, verifyAdmin, async (req, res) => {
-	const toBeDeletedTrade = await Trade.findOne({
-		where: {
-			id: req.body.id,
-		},
-	});
-
 	const deletedTrade = await Trade.destroy({
 		where: {
 			id: req.body.id,

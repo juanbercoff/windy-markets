@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 
 const cookieParser = require('cookie-parser');
@@ -11,6 +12,10 @@ const { verifyToken } = require('./verifyToken');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(
+	'/user-trade-image',
+	express.static(path.join(__dirname, 'images/user-images-storage'))
+);
 
 // Routes
 const authRoute = require('./routes/auth');
